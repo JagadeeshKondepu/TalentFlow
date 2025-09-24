@@ -33,7 +33,6 @@ A React-based hiring platform that allows HR teams to manage jobs, candidates, a
 - **Drag & Drop**: @dnd-kit
 - **Virtualization**: react-window
 - **Mock API**: MSW (Mock Service Worker)
-- **Local Storage**: Dexie (IndexedDB wrapper)
 
 ## Setup Instructions
 
@@ -56,16 +55,15 @@ A React-based hiring platform that allows HR teams to manage jobs, candidates, a
 
 ### Data Flow
 ```
-UI Components → React Query → MSW Handlers → IndexedDB (via Dexie)
+UI Components → React Query → MSW Handlers 
 ```
 
 ### Key Design Decisions
 
 1. **MSW for API Simulation**: Provides realistic network behavior with configurable latency and error rates
-2. **IndexedDB for Persistence**: All data persists locally across browser sessions
-3. **React Query for State Management**: Handles caching, background updates, and optimistic updates
-4. **Virtualization**: Handles large candidate lists efficiently
-5. **Optimistic Updates**: Immediate UI feedback with rollback on failure
+2. **React Query for State Management**: Handles caching, background updates, and optimistic updates
+3. **Virtualization**: Handles large candidate lists efficiently
+4. **Optimistic Updates**: Immediate UI feedback with rollback on failure
 
 ### Project Structure
 ```
@@ -120,7 +118,6 @@ src/
 ## Browser Support
 
 - Modern browsers with ES6+ support
-- IndexedDB support required
 - Responsive design for mobile/tablet
 
 ## Known Issues
