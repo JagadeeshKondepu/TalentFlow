@@ -37,6 +37,14 @@ const CandidatesPage = () => {
         submissions = window.assessmentSubmissions;
       }
       
+      // If still no submissions, create mock data for some candidates
+      if (submissions.length === 0) {
+        const candidateNum = parseInt(candidateId.replace('candidate-', ''));
+        if (candidateNum % 5 === 0) { // Every 5th candidate has completed assessment
+          return 'completed';
+        }
+      }
+      
       const submission = submissions.find(s => s.candidateId === candidateId);
       return submission?.status || null;
     } catch (error) {
