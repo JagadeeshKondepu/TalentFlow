@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { apiRequest } from '../utils/api';
 import { ArrowLeft, CheckCircle, XCircle, Award } from 'lucide-react';
 
 const AssessmentResult = () => {
@@ -9,23 +10,21 @@ const AssessmentResult = () => {
   const { data: candidate, error: candidateError } = useQuery({
     queryKey: ['candidate', candidateId],
     queryFn: async () => {
-      const response = await fetch(`/api/candidates?pageSize=1000`);
-      if (!response.ok) throw new Error('Failed to fetch candidate');
-      const result = await response.json();
+      const result = await apiRequest(`/api/candidates?pageSize=1000`);
       return result.data.find(c => c.id === candidateId);
-    }
+    },
+    retry: false
   });
 
   const { data: job, error: jobError } = useQuery({
     queryKey: ['job', candidate?.jobId],
     queryFn: async () => {
       if (!candidate?.jobId) return null;
-      const response = await fetch(`/api/jobs?pageSize=100`);
-      if (!response.ok) throw new Error('Failed to fetch job');
-      const result = await response.json();
+      const result = await apiRequest(`/api/jobs?pageSize=100`);
       return result.data.find(j => j.id === candidate.jobId);
     },
-    enabled: !!candidate?.jobId
+    enabled: !!candidate?.jobId,
+    retry: false
   });
 
   const getSubmission = () => {
@@ -37,9 +36,29 @@ const AssessmentResult = () => {
         submissions = window.assessmentSubmissions;
       }
       
+      // If no submissions, create mock data for demo
+      if (submissions.length === 0) {
+        const candidateNum = parseInt(candidateId.replace('candidate-', ''));
+        if (candidateNum % 5 === 0) {
+          return {
+            candidateId,
+            status: 'completed',
+            submittedAt: new Date().toISOString(),
+            timeSpent: Math.floor(Math.random() * 30) + 45,
+            scores: {
+              aptitude: Math.floor(Math.random() * 30) + 70,
+              subjective: Math.floor(Math.random() * 30) + 65,
+              communication: Math.floor(Math.random() * 25) + 75,
+              coding: Math.floor(Math.random() * 35) + 60,
+              overall: Math.floor(Math.random() * 25) + 70
+            }
+          };
+        }
+      }
+      
       return submissions.find(s => s.candidateId === candidateId);
     } catch (error) {
-      console.error('Failed to parse assessment submissions:', error);
+      console.warn('Failed to parse assessment submissions:', error.message);
       return null;
     }
   };
