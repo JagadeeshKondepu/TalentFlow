@@ -22,8 +22,9 @@ const JobDetail = () => {
   const { data: candidates, error: candidatesError } = useQuery({
     queryKey: ['candidates', { jobId }],
     queryFn: async () => {
-      const result = await apiRequest(`/api/candidates?pageSize=1000&jobId=${jobId}`);
-      return result?.data || [];
+      const result = await apiRequest(`/api/candidates?pageSize=1000`);
+      // Filter candidates by jobId
+      return result?.data?.filter(c => c.jobId === jobId) || [];
     },
     retry: false
   });
