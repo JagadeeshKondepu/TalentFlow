@@ -36,24 +36,21 @@ const AssessmentResult = () => {
         submissions = window.assessmentSubmissions;
       }
       
-      // If no submissions, create mock data for demo
+      // If no submissions, create mock data for all candidates
       if (submissions.length === 0) {
-        const candidateNum = parseInt(candidateId.replace('candidate-', ''));
-        if (candidateNum % 5 === 0) {
-          return {
-            candidateId,
-            status: 'completed',
-            submittedAt: new Date().toISOString(),
-            timeSpent: Math.floor(Math.random() * 30) + 45,
-            scores: {
-              aptitude: Math.floor(Math.random() * 30) + 70,
-              subjective: Math.floor(Math.random() * 30) + 65,
-              communication: Math.floor(Math.random() * 25) + 75,
-              coding: Math.floor(Math.random() * 35) + 60,
-              overall: Math.floor(Math.random() * 25) + 70
-            }
-          };
-        }
+        return {
+          candidateId,
+          status: 'completed',
+          submittedAt: new Date().toISOString(),
+          timeSpent: Math.floor(Math.random() * 30) + 45,
+          scores: {
+            aptitude: Math.floor(Math.random() * 30) + 70,
+            subjective: Math.floor(Math.random() * 30) + 65,
+            communication: Math.floor(Math.random() * 25) + 75,
+            coding: Math.floor(Math.random() * 35) + 60,
+            overall: Math.floor(Math.random() * 25) + 70
+          }
+        };
       }
       
       return submissions.find(s => s.candidateId === candidateId);
