@@ -24,7 +24,7 @@ const JobsPage = () => {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['jobs', { page, search: debouncedSearch, status, department, location }],
-    queryFn: async () => {
+    queryFn: () => {
       const params = new URLSearchParams({
         page: page.toString(),
         pageSize: '10',
@@ -33,8 +33,10 @@ const JobsPage = () => {
         ...(department && { department }),
         ...(location && { location })
       });
-      return await apiRequest(`/api/jobs?${params}`);
-    }
+      return apiRequest(`/api/jobs?${params}`);
+    },
+    retry: false,
+    refetchOnWindowFocus: false
   });
 
   const handleSearch = () => {

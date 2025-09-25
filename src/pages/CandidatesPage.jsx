@@ -16,18 +16,14 @@ const CandidatesPage = () => {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['candidates', { pageSize: 1000 }],
-    queryFn: async () => {
-      try {
-        const params = new URLSearchParams({
-          pageSize: '1000'
-        });
-        return await apiRequest(`/api/candidates?${params}`);
-      } catch (err) {
-        console.warn('Fetching candidates failed, using fallback mock data:', err.message);
-        return { data: [] };
-      }
+    queryFn: () => {
+      const params = new URLSearchParams({
+        pageSize: '1000'
+      });
+      return apiRequest(`/api/candidates?${params}`);
     },
-    retry: false
+    retry: false,
+    refetchOnWindowFocus: false
   });
 
   const candidates = data?.data || [];

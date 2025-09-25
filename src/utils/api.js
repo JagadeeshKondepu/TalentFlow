@@ -9,19 +9,27 @@ export const apiRequest = async (url, options = {}) => {
       },
     });
 
-    // If response is HTML instead of JSON, force fallback
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      throw new Error('Invalid JSON, falling back to mock data');
+    // Check content type before attempting to parse
+    const contentType = response.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      console.warn(`Non-JSON response for ${url}, using mock data`);
+      return getMockResponse(url, options.method);
     }
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      console.warn(`HTTP ${response.status} for ${url}, using mock data`);
+      return getMockResponse(url, options.method);
     }
 
-    return await response.json();
+    // Try to parse JSON, catch any parsing errors
+    try {
+      return await response.json();
+    } catch (parseError) {
+      console.warn(`JSON parse error for ${url}, using mock data:`, parseError.message);
+      return getMockResponse(url, options.method);
+    }
   } catch (error) {
-    console.warn('API request failed, using mock data:', error.message);
+    console.warn(`Network error for ${url}, using mock data:`, error.message);
     return getMockResponse(url, options.method);
   }
 };
