@@ -13,8 +13,8 @@ const JobDetail = () => {
   const { data: job, isLoading, error: jobError } = useQuery({
     queryKey: ['job', jobId],
     queryFn: async () => {
-      const result = await apiRequest(`/api/jobs?search=${jobId}`);
-      return result.data.find(j => j.id === jobId);
+      const result = await apiRequest(`/api/jobs?pageSize=100`);
+      return result?.data?.find(j => j.id === jobId) || null;
     },
     retry: false
   });
@@ -23,7 +23,7 @@ const JobDetail = () => {
     queryKey: ['candidates', { jobId }],
     queryFn: async () => {
       const result = await apiRequest(`/api/candidates?pageSize=1000&jobId=${jobId}`);
-      return result.data;
+      return result?.data || [];
     },
     retry: false
   });

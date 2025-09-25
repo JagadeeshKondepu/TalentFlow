@@ -14,7 +14,7 @@ const CandidateDetail = () => {
     queryKey: ['candidate', id],
     queryFn: async () => {
       const result = await apiRequest(`/api/candidates?pageSize=1000`);
-      return result.data.find(c => c.id === id);
+      return result?.data?.find(c => c.id === id) || null;
     },
     retry: false
   });
@@ -24,7 +24,7 @@ const CandidateDetail = () => {
     queryFn: async () => {
       if (!candidate?.jobId) return null;
       const result = await apiRequest(`/api/jobs?pageSize=100`);
-      return result.data.find(j => j.id === candidate.jobId);
+      return result?.data?.find(j => j.id === candidate.jobId) || null;
     },
     enabled: !!candidate?.jobId,
     retry: false
