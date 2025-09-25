@@ -60,6 +60,14 @@ const getMockResponse = (url, method = 'GET') => {
     const seniorities = ['Junior', 'Mid', 'Senior', 'Lead'];
     const statuses = ['active', 'archived'];
     
+    const jobApplicantCounts = [
+      15, 22, 31, 18, 27, 12, 8, 14, 25, 19, // job-1 to job-10
+      33, 16, 29, 21, 11, 24, 17, 35, 13, 28, // job-11 to job-20
+      20, 26, 15, 32, 18, 23, 14, 30, 19, 25, // job-21 to job-30
+      22, 17, 34, 12, 27, 21, 16, 29, 24, 18, // job-31 to job-40
+      31, 15, 26, 20, 33, 19, 28, 14, 23, 17  // job-41 to job-50
+    ];
+    
     const allJobs = Array.from({ length: 50 }, (_, i) => {
       const template = jobTemplates[i % jobTemplates.length];
       return {
@@ -70,7 +78,7 @@ const getMockResponse = (url, method = 'GET') => {
         status: i < 40 ? 'active' : 'archived',
         tags: template.tags,
         seniority: seniorities[i % seniorities.length],
-        applicantCount: Math.floor(Math.random() * 50) + 5,
+        applicantCount: jobApplicantCounts[i],
         createdAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString()
       };
     });
@@ -129,25 +137,41 @@ const getMockResponse = (url, method = 'GET') => {
     const searchTerm = urlObj.searchParams.get('search')?.toLowerCase() || '';
     const stageFilter = urlObj.searchParams.get('stage') || '';
     
-    const totalCandidates = 1250;
-    const startIndex = (page - 1) * pageSize;
+    // Generate candidates based on job applicant counts
+    const jobApplicantCounts = [
+      15, 22, 31, 18, 27, 12, 8, 14, 25, 19, // job-1 to job-10
+      33, 16, 29, 21, 11, 24, 17, 35, 13, 28, // job-11 to job-20
+      20, 26, 15, 32, 18, 23, 14, 30, 19, 25, // job-21 to job-30
+      22, 17, 34, 12, 27, 21, 16, 29, 24, 18, // job-31 to job-40
+      31, 15, 26, 20, 33, 19, 28, 14, 23, 17  // job-41 to job-50
+    ];
     
-    let candidates = Array.from({ length: totalCandidates }, (_, i) => {
-      const firstName = firstNames[i % firstNames.length];
-      const lastName = lastNames[Math.floor(i / firstNames.length) % lastNames.length];
-      const name = `${firstName} ${lastName} ${i > 399 ? `(${Math.floor(i/400) + 1})` : ''}`;
+    let candidates = [];
+    let candidateId = 1;
+    
+    // Generate candidates for each job based on its applicant count
+    for (let jobIndex = 0; jobIndex < 50; jobIndex++) {
+      const jobId = `job-${jobIndex + 1}`;
+      const applicantCount = jobApplicantCounts[jobIndex];
       
-      return {
-        id: `candidate-${i + 1}`,
-        name,
-        email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}${i > 399 ? i : ''}@example.com`,
-        stage: ['applied', 'screen', 'tech', 'offer', 'hired', 'rejected'][i % 6],
-        jobId: `job-${(i % 50) + 1}`,
-        skills: skillSets[i % skillSets.length],
-        assessmentScore: Math.floor(Math.random() * 40) + 60,
-        createdAt: new Date(Date.now() - Math.random() * 60 * 24 * 60 * 60 * 1000).toISOString(),
-      };
-    });
+      for (let i = 0; i < applicantCount; i++) {
+        const firstName = firstNames[candidateId % firstNames.length];
+        const lastName = lastNames[Math.floor(candidateId / firstNames.length) % lastNames.length];
+        const name = `${firstName} ${lastName} ${candidateId > 399 ? `(${Math.floor(candidateId/400) + 1})` : ''}`;
+        
+        candidates.push({
+          id: `candidate-${candidateId}`,
+          name,
+          email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}${candidateId > 399 ? candidateId : ''}@example.com`,
+          stage: ['applied', 'screen', 'tech', 'offer', 'hired', 'rejected'][i % 6],
+          jobId,
+          skills: skillSets[candidateId % skillSets.length],
+          assessmentScore: Math.floor(Math.random() * 40) + 60,
+          createdAt: new Date(Date.now() - Math.random() * 60 * 24 * 60 * 60 * 1000).toISOString(),
+        });
+        candidateId++;
+      }
+    }
     
     // Apply filters
     if (searchTerm) {
@@ -162,6 +186,7 @@ const getMockResponse = (url, method = 'GET') => {
       candidates = candidates.filter(candidate => candidate.stage === stageFilter);
     }
     
+    const startIndex = (page - 1) * pageSize;
     const paginatedCandidates = candidates.slice(startIndex, startIndex + pageSize);
     
     return {
