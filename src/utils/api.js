@@ -1,5 +1,11 @@
 // Fallback API wrapper with error handling
 export const apiRequest = async (url, options = {}) => {
+  // Always use mock data for API endpoints to avoid MSW issues
+  if (url.includes('/api/')) {
+    console.log(`Using mock data for ${url}`);
+    return getMockResponse(url, options.method);
+  }
+
   try {
     const response = await fetch(url, {
       ...options,
