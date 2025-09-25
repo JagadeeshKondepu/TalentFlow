@@ -9,21 +9,19 @@ export const apiRequest = async (url, options = {}) => {
       },
     });
 
-    // If we get HTML instead of JSON, it means MSW isn't working
+    // If response is HTML instead of JSON, force fallback
     const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('text/html')) {
-      console.warn('MSW not working, returning mock data for:', url);
-      return getMockResponse(url, options.method);
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Invalid JSON, falling back to mock data');
     }
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
-    return response.json();
+    return await response.json();
   } catch (error) {
-    console.error('API request failed:', error);
-    // Return mock data as fallback
+    console.warn('API request failed, using mock data:', error.message);
     return getMockResponse(url, options.method);
   }
 };
