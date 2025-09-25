@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { apiRequest } from '../utils/api';
 import { ArrowLeft, Users, FileText, Plus } from 'lucide-react';
 import JobAnalytics from '../components/JobAnalytics';
 import AssessmentBuilder from '../components/AssessmentBuilder';
@@ -12,30 +13,27 @@ const JobDetail = () => {
   const { data: job, isLoading, error: jobError } = useQuery({
     queryKey: ['job', jobId],
     queryFn: async () => {
-      const response = await fetch(`/api/jobs?search=${jobId}`);
-      if (!response.ok) throw new Error('Failed to fetch job');
-      const result = await response.json();
+      const result = await apiRequest(`/api/jobs?search=${jobId}`);
       return result.data.find(j => j.id === jobId);
-    }
+    },
+    retry: false
   });
 
   const { data: candidates, error: candidatesError } = useQuery({
     queryKey: ['candidates', { jobId }],
     queryFn: async () => {
-      const response = await fetch(`/api/candidates?pageSize=1000&jobId=${jobId}`);
-      if (!response.ok) throw new Error('Failed to fetch candidates');
-      const result = await response.json();
+      const result = await apiRequest(`/api/candidates?pageSize=1000&jobId=${jobId}`);
       return result.data;
-    }
+    },
+    retry: false
   });
 
   const { data: assessment, error: assessmentError } = useQuery({
     queryKey: ['assessment', jobId],
     queryFn: async () => {
-      const response = await fetch(`/api/assessments/${jobId}`);
-      if (!response.ok) throw new Error('Failed to fetch assessment');
-      return response.json();
-    }
+      return await apiRequest(`/api/assessments/${jobId}`);
+    },
+    retry: false
   });
 
   if (isLoading) {

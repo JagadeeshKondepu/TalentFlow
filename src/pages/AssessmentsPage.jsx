@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { apiRequest } from '../utils/api';
 import AssessmentBuilder from '../components/AssessmentBuilder';
 import AssessmentLibrary from '../components/AssessmentLibrary';
 import { Plus } from 'lucide-react';
@@ -11,21 +12,19 @@ const AssessmentsPage = () => {
   const { data: jobs, error: jobsError } = useQuery({
     queryKey: ['jobs', { status: 'active' }],
     queryFn: async () => {
-      const response = await fetch('/api/jobs?status=active&pageSize=100');
-      if (!response.ok) throw new Error('Failed to fetch jobs');
-      return response.json();
-    }
+      return await apiRequest('/api/jobs?status=active&pageSize=100');
+    },
+    retry: false
   });
 
   const { data: assessment, error: assessmentError } = useQuery({
     queryKey: ['assessment', selectedJobId],
     queryFn: async () => {
       if (!selectedJobId) return null;
-      const response = await fetch(`/api/assessments/${selectedJobId}`);
-      if (!response.ok) throw new Error('Failed to fetch assessment');
-      return response.json();
+      return await apiRequest(`/api/assessments/${selectedJobId}`);
     },
-    enabled: !!selectedJobId
+    enabled: !!selectedJobId,
+    retry: false
   });
 
   return (
