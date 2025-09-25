@@ -43,20 +43,14 @@ const JobsPage = () => {
 
   const reorderMutation = useMutation({
     mutationFn: async ({ jobId, fromOrder, toOrder }) => {
-      const response = await fetch(`/api/jobs/${jobId}/reorder`, {
+      return await apiRequest(`/api/jobs/${jobId}/reorder`, {
         method: 'PATCH',
-        headers: { 
-          'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest'
-        },
         body: JSON.stringify({ fromOrder, toOrder })
       });
-      if (!response.ok) throw new Error('Reorder failed');
-      return response.json();
     },
     onError: (error) => {
       queryClient.invalidateQueries(['jobs']);
-      console.error('Failed to reorder jobs:', error);
+      console.warn('Failed to reorder jobs:', error.message);
     }
   });
 
