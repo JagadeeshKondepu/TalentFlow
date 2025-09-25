@@ -172,6 +172,31 @@ const getMockResponse = (url, method = 'GET') => {
     };
   }
 
+  if (url.includes('/api/candidates/') && url.includes('/timeline')) {
+    const candidateId = url.split('/')[3];
+    const candidateNum = parseInt(candidateId.replace('candidate-', ''));
+    
+    return [
+      {
+        id: `timeline-${candidateNum}-1`,
+        type: 'stage_change',
+        fromStage: 'applied',
+        toStage: 'screen',
+        createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: `timeline-${candidateNum}-2`,
+        type: 'note_added',
+        createdAt: new Date(Date.now() - Math.random() * 5 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: `timeline-${candidateNum}-3`,
+        type: 'assessment_completed',
+        createdAt: new Date(Date.now() - Math.random() * 3 * 24 * 60 * 60 * 1000).toISOString()
+      }
+    ];
+  }
+
   if (url.includes('/api/assessments')) {
     if (method === 'POST') {
       return {

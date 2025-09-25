@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '../utils/api';
 import { ArrowLeft, Plus, Clock } from 'lucide-react';
 import AssessmentResults from '../components/AssessmentResults';
 
@@ -12,42 +13,35 @@ const CandidateDetail = () => {
   const { data: candidate, isLoading, error } = useQuery({
     queryKey: ['candidate', id],
     queryFn: async () => {
-      const response = await fetch(`/api/candidates?pageSize=1000`);
-      if (!response.ok) throw new Error('Failed to fetch candidate');
-      const result = await response.json();
+      const result = await apiRequest(`/api/candidates?pageSize=1000`);
       return result.data.find(c => c.id === id);
-    }
+    },
+    retry: false
   });
 
   const { data: job } = useQuery({
     queryKey: ['job', candidate?.jobId],
     queryFn: async () => {
       if (!candidate?.jobId) return null;
-      const response = await fetch(`/api/jobs?pageSize=100`);
-      if (!response.ok) throw new Error('Failed to fetch job');
-      const result = await response.json();
+      const result = await apiRequest(`/api/jobs?pageSize=100`);
       return result.data.find(j => j.id === candidate.jobId);
     },
-    enabled: !!candidate?.jobId
+    enabled: !!candidate?.jobId,
+    retry: false
   });
 
   const { data: timeline } = useQuery({
     queryKey: ['timeline', id],
     queryFn: async () => {
-      const response = await fetch(`/api/candidates/${id}/timeline`);
-      if (!response.ok) throw new Error('Failed to fetch timeline');
-      return response.json();
-    }
+      return await apiRequest(`/api/candidates/${id}/timeline`);
+    },
+    retry: false
   });
 
   const addNoteMutation = useMutation({
     mutationFn: async (note) => {
-      const response = await fetch(`/api/candidates/${id}`, {
+      return await apiRequest(`/api/candidates/${id}`, {
         method: 'PATCH',
-        headers: { 
-          'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest'
-        },
         body: JSON.stringify({ 
           notes: [...(candidate.notes || []), {
             id: Date.now().toString(),
@@ -58,15 +52,13 @@ const CandidateDetail = () => {
           }]
         })
       });
-      if (!response.ok) throw new Error('Failed to add note');
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['candidate', id]);
       setNewNote('');
     },
     onError: (error) => {
-      console.error('Failed to add note:', error);
+      console.warn('Failed to add note:', error.message);
     }
   });
 
